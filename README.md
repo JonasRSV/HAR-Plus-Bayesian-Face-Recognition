@@ -7,9 +7,10 @@ http://www.hpl.hp.com/techreports/Compaq-DEC/CRL-2001-1.pdf
   * Two Recangle Diff
   * Three Rectangle Diff
   * Four Rectangle Diff
-2. Cascade classifier P. 11 (Using AdaBoosting)
-3. Training Algorithm for Cascade classifier P. 14
-4. Image processing P. 18
+2. Learning Classification Functions P. 6
+3. Cascade classifier P. 11 (Using AdaBoosting)
+4. Training Algorithm for Cascade classifier P. 14
+5. Image processing P. 18
 
 
 
