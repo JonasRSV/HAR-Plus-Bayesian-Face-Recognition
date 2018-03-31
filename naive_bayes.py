@@ -33,7 +33,7 @@ class naive_bayes(object):
         self.expected_values = zeros((nof_classes, features))
         self.covariances = zeros((nof_classes, features, features))
         for index, _class enumerate(unique_classes):
-            class_data = data[_class = classes]
+            class_data = data[_class == classes]
 
             self.expected_values[index] = mean(class_data, axis=0)
             self.covariances[index] = class_data @ class_data.T
