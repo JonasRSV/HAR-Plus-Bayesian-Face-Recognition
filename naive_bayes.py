@@ -1,4 +1,4 @@
-from numpy import array, zeros, mean, log
+from numpy import array, zeros, mean, log, ones, square
 from sys import exit
 
 class naive_bayes(object):
@@ -15,37 +15,58 @@ class naive_bayes(object):
     """
 
     def __init__(self):
-        """Constructor. """
+        """Constructor."""
         self.priors = None
         self.covariances = None
         self.expected_values = None
         self.labels = None
 
-        self.unique_classes = None
+        self.classes = None
+        self.num_of_classes = None
 
-    def __calculate_priori(self, classes):
+        self.features = None
+        self.samples = None
+
+    def __calculate_priori(self, labels):
         """Calculate the priori for each class."""
-        cardinality = len(classes)
-        priors = zeros(len(self.unique_classes))
-        for index, _class in enumerate(self.unique_classes):
-            occurrences = classes[_class == classes]
+        priors = zeros(self.num_of_classes)
+        for _class in self.classes:
+            occurrences = len(labels[_class == labels])
 
-            priors[index] = occurrences / cardinality
+            priors[_class] = occurrences / self.samples
 
         return priors
 
-    def __calculate_maximum_likelyhood(self, data, classes):
+    def __calculate_maximum_likelyhood(self, data, labels,
+                                       boost_weigths=None):
         """Calculate covariance and expected value for each class."""
-        nof_classes = len(self.unique_classes)
-        (cardinality, features) = data.shape
+        if boost_weigths is None:
+            boost_weigths = ones(self.samples)
 
-        expected_values = zeros((nof_classes, features))
-        covariances = zeros((nof_classes, features, features))
-        for index, _class in enumerate(self.unique_classes):
-            class_data = data[_class == classes]
+        expected_values = zeros((self.num_of_classes,
+                                 self.features)
+                                )
 
-            self.expected_values[index] = mean(class_data, axis=0)
-            self.covariances[index] = class_data @ class_data.T
+        covariances = zeros((self.num_of_classes,
+                             self.features,
+                             self.features)
+                            )
+
+        for _class in self.classes:
+            class_data = data[_class == labels]
+            weights = boost_weigths[_class == labels]
+
+            expected_values[_class] = (weights.T @ class_data) / sum(weights)
+            covariance = zeros((self.features, self.features))
+
+            for feature in range(self.features):
+                variance = square(class_data[:, feature]
+                                  - expected_values[feature])
+
+                covariance[feature][feature] =\
+                    weights @ variance / sum(weights)
+
+            covariances[_class] = covariance
 
         return covariances, expected_values
 
@@ -54,11 +75,13 @@ class naive_bayes(object):
         class_belongance = -1
         max_aposteori = -1
         for class_ in self.unique_classes:
+            class_ = int(class_)
+
             covariance = self.covariances[class_]
             expected_value = self.expected_values[class_]
             priori = self.priors[class_]
 
-            quadratic_form =  (X - expected_value) @ iodm(covariance) @ (X - expected_value).T
+            quadratic_form = (X - expected_value) @ iodm(covariance) @ (X - expected_value).T
             log_likelyhood = -0.5 * (log(dodm(covariance)) + quadratic_form)
             log_priori = log(priori)
 
@@ -72,17 +95,13 @@ class naive_bayes(object):
 
     def train(self, data, classes):
         """Train the classifier."""
+        self.samples, self.features = data.shape
         self.unique_classes = set(classes)
+        self.classes = len(self.unique_classes)
         self.priors = self.__calculate_priori(classes)
         self.covariances, self.expected_values =\
             self.__calculate_maximum_likelyhood(data, classes)
 
-        """Not sure if this is needed, but it does impact result."""
-        intermediary = zeros(self.covariances.shape)
-        for index, covariance in enumerate(self.covariances):
-            intermediary[index] = ignore_feature_dependence(covariance)
-
-        self.covariances = intermediary
 
         return self
 
@@ -108,21 +127,14 @@ def dodm(matrix):
 
 def iodm(matrix):
     """Get inverse of a diagnoalized matrix (Or assumed to be)."""
-    return 1 / matrix
-
-
-def ignore_feature_dependence(matrix):
-    """Remove feature dependant factors of covmatrix."""
     (x, y) = matrix.shape
-    ifdm = zeros((x, y))
 
     if x != y:
-        print("Invalid matrix shape in ignore_feature_dependence")
+        print("Non Square matrix not invertible.")
         exit(1)
 
     for i in range(x):
-        ifdm[i][i] = matrix[i][i]
+        matrix[i][i] = 1 / matrix[i][i]
 
-    return ifdm
-
+    return matrix
 
