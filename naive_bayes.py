@@ -8,15 +8,15 @@ class naive_bayes(object):
         self.covariances = None
         self.expected_values = None
         self.labels = None
-
+        self.unique_classes = None
 
     def __calculate_priori(self, classes):
         """Calculate the priori for each class."""
-        unique_classes = set(classes)
+        self.unique_classes = set(classes)
 
         cardinality = len(classes)
-        self.priors = zeros(len(unique_classes))
-        for index, _class in enumerate(unique_classes):
+        self.priors = zeros(len(self.unique_classes))
+        for index, _class in enumerate(self.unique_classes):
             occurrences = classes[_class == classes]
 
             self.priors[index] = occurrences / cardinality
@@ -32,7 +32,7 @@ class naive_bayes(object):
 
         self.expected_values = zeros((nof_classes, features))
         self.covariances = zeros((nof_classes, features, features))
-        for index, _class enumerate(unique_classes):
+        for index, _class in enumerate(unique_classes):
             class_data = data[_class == classes]
 
             self.expected_values[index] = mean(class_data, axis=0)
@@ -42,14 +42,17 @@ class naive_bayes(object):
 
     def __normal_dist_max_aposteori(self, X):
         """Classify X using the generalized normal distribution."""
+
+        for class
         pass
-    
+
+    def train(self, 
 
 
 def dodm(matrix):
     """Get determinant of a diagonalized matrix (Or assumed to be)."""
     (x, y) = matrix.shape
-    
+
     if x != y:
         print("Determinant of a non-square matrix is always 0")
         return 0
