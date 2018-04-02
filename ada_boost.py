@@ -1,5 +1,6 @@
 from naive_bayes import naive_bayes
 from numpy import array, zeros, ones, log
+from time import time
 
 INT_MAX = 10000000000
 
@@ -23,13 +24,17 @@ class boosted_classifier(object):
         self.classifier = classifier
 
         self.classifiers = []
-        self.features = []
+        self.feature_extracters = []
 
         self.alphas = zeros(num_of_features)
         self.alpha_sum = 0
 
-    def train(self, feature_matrix, features_extracters, labels):
+    def train(self, feature_matrix, feature_extracters, labels):
         """Boost classifiers on features."""
+        print("Training boosted classifier with {} features"
+              .format(self.num_of_features))
+        timestamp = time()
+
         weigths = ones(labels.shape) / len(labels)
 
         for index in range(self.num_of_features):
@@ -59,7 +64,7 @@ class boosted_classifier(object):
 
                 if error < lowest_error:
                     best_classifier = classifier
-                    feature_extracter = features_extracters[feature_index]
+                    feature_extracter = feature_extracters[feature_index]
 
                     lowest_error = error
                     classifications = classifications_
@@ -96,16 +101,17 @@ class boosted_classifier(object):
 
             self.alphas[index] = log(1 / Bt)
             self.classifiers.append(best_classifier)
-            self.features.append(feature_extracter)
+            self.feature_extracters.append(feature_extracter)
 
         self.alpha_sum = sum(self.alphas)
-        return True
+
+        return time() - timestamp
 
     def predict(self, X):
         """Predict belongance of X."""
         prediction = 0
         for index, alpha in self.alphas:
-            """feature = self.features.get(X)."""
+            """feature = self.feature_extracters[index].get(X)."""
             feature = 5
             prediction += alpha * self.classifiers[index].predict(feature)
 
@@ -114,8 +120,4 @@ class boosted_classifier(object):
         """
 
         return 1 if prediction > (self.alpha_sum / 2) else 0
-
-
-
-
 
