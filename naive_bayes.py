@@ -1,6 +1,9 @@
 from numpy import array, zeros, mean, log, ones, square
 from sys import exit
 
+MINUS_INF = -100000000000
+
+
 class naive_bayes(object):
     """
     Naive Bayes classifier.
@@ -27,13 +30,20 @@ class naive_bayes(object):
         self.features = None
         self.samples = None
 
-    def __calculate_priori(self, labels):
+    def __calculate_priori(self, labels, boost_weigths=None):
         """Calculate the priori for each class."""
-        priors = zeros(self.num_of_classes)
-        for _class in self.classes:
-            occurrences = len(labels[_class == labels])
+        if boost_weigths is None:
+            boost_weigths = ones(self.samples)
 
-            priors[_class] = occurrences / self.samples
+        priors = zeros(self.num_of_classes)
+        label_ones = ones(self.samples)
+        for _class in self.classes:
+            _class = int(_class)
+
+            occurrences = label_ones[_class == labels]
+            weights = boost_weigths[_class == labels]
+
+            priors[_class] = (weights @ occurrences) / sum(boost_weigths)
 
         return priors
 
@@ -53,6 +63,8 @@ class naive_bayes(object):
                             )
 
         for _class in self.classes:
+            _class = int(_class)
+
             class_data = data[_class == labels]
             weights = boost_weigths[_class == labels]
 
@@ -61,10 +73,10 @@ class naive_bayes(object):
 
             for feature in range(self.features):
                 variance = square(class_data[:, feature]
-                                  - expected_values[feature])
+                                  - expected_values[_class][feature])
 
                 covariance[feature][feature] =\
-                    weights @ variance / sum(weights)
+                    (weights @ variance) / sum(weights)
 
             covariances[_class] = covariance
 
@@ -72,9 +84,12 @@ class naive_bayes(object):
 
     def __normal_dist_max_aposteori(self, X):
         """Classify X using the generalized normal distribution."""
+        print(self.covariances)
+        print(self.expected_values)
+        print(self.priors)
         class_belongance = -1
-        max_aposteori = -1
-        for class_ in self.unique_classes:
+        max_aposteori = MINUS_INF
+        for class_ in self.classes:
             class_ = int(class_)
 
             covariance = self.covariances[class_]
@@ -87,6 +102,8 @@ class naive_bayes(object):
 
             belongance = log_likelyhood + log_priori
 
+            print(belongance)
+
             if belongance > max_aposteori:
                 max_aposteori = belongance
                 class_belongance = class_
@@ -96,12 +113,11 @@ class naive_bayes(object):
     def train(self, data, classes):
         """Train the classifier."""
         self.samples, self.features = data.shape
-        self.unique_classes = set(classes)
-        self.classes = len(self.unique_classes)
+        self.classes = set(classes)
+        self.num_of_classes = len(self.classes)
         self.priors = self.__calculate_priori(classes)
         self.covariances, self.expected_values =\
             self.__calculate_maximum_likelyhood(data, classes)
-
 
         return self
 
