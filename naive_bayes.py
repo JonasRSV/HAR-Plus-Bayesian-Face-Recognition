@@ -38,6 +38,7 @@ class naive_bayes(object):
         priors = zeros(self.num_of_classes)
         label_ones = ones(self.samples)
         for _class in self.classes:
+            print("Calculating Priori for class {}".format(_class))
             _class = int(_class)
 
             occurrences = label_ones[_class == labels]
@@ -63,6 +64,7 @@ class naive_bayes(object):
                             )
 
         for _class in self.classes:
+            print("Calculating Maximum likelyhood for class {}".format(_class))
             _class = int(_class)
 
             class_data = data[_class == labels]
@@ -84,9 +86,6 @@ class naive_bayes(object):
 
     def __normal_dist_max_aposteori(self, X):
         """Classify X using the generalized normal distribution."""
-        print(self.covariances)
-        print(self.expected_values)
-        print(self.priors)
         class_belongance = -1
         max_aposteori = MINUS_INF
         for class_ in self.classes:
@@ -101,8 +100,6 @@ class naive_bayes(object):
             log_priori = log(priori)
 
             belongance = log_likelyhood + log_priori
-
-            print(belongance)
 
             if belongance > max_aposteori:
                 max_aposteori = belongance
@@ -119,6 +116,7 @@ class naive_bayes(object):
         self.covariances, self.expected_values =\
             self.__calculate_maximum_likelyhood(data, classes)
 
+        print("Training done.")
         return self
 
     def predict(self, X):
