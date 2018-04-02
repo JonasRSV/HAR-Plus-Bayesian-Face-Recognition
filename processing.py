@@ -8,18 +8,8 @@ class IntegralImage():
         self.img = image
 
     def process(self):
-        self.ii = self.integral_image(self.img)
-
-    def sum_square(self, x, y, w, h):
-        x = int(x * self.w / 100)
-        y = int(y * self.h / 100)
-        w = int(w * self.w / 100)
-        h = int(h * self.h / 100)
-        
-        return self.seg_ii(self.ii, (x, y), (x + w, y), (x, y + h), (x + w, y + h))
-
-    def integral_image(image):
         """Preprocess the integral image from top-left corner."""
+        image = self.img
         s = zeros(image.shape)
         ii = zeros(image.shape)
 
@@ -36,39 +26,42 @@ class IntegralImage():
                 else:
                     ii[indeY][indeX] = ii[indeY - 1][indeX] + s[indeX][indeY]
 
-        return ii
+        self.ii = ii
+
+    def sum_square(self, x, y, w, h):
+        x = int(x * self.w)
+        y = int(y * self.h)
+        w = int(w * self.w)
+        h = int(h * self.h)
+        
+        tl_x, tl_y = (x, y)
+        tr_x, tr_y = (x + w, y)
+        bl_x, bl_y = (x, y + h)
+        br_x, br_y = (x + w, y + h)
+
+        return self.ii[br_y][br_x] + self.ii[tl_y][tl_x] - self.ii[tr_y][tr_x] - self.ii[bl_y][bl_x]
 
 
-    def seg_ii(ii, top_left, top_right, bottom_left, bottom_right):
-        """Get segment from integral image given segment corners."""
-        tl_x, tl_y = top_left
-        tr_x, tr_y = top_right
-        br_x, br_y = bottom_right
-        bl_x, bl_y = bottom_left
+def load_image(name):
+    """Load image for classification."""
+    img = Image.open(name)
+    img.load()
 
-        return ii[br_y][br_x] + ii[tl_y][tl_x] - ii[tr_y][tr_x] - ii[bl_y][bl_x]
+    return asarray(img, dtype="B")
 
 
-    def load_image(name):
-        """Load image for classification."""
-        img = Image.open(name)
-        img.load()
+def grey_scale(image):
+    """Make image monochannel :D."""
 
-        return asarray(img, dtype="B")
+    if len(image.shape) == 2:
+        return image
 
+    x, y, = image.shape
+    grey = zeros((y, x))
+    for row in range(y):
+        for col in range(x):
+            grey[y][x] = 0.25 * image[y][x][0]\
+                    + 0.5  * image[y][x][1]\
+                    + 0.25 * image[y][x][2]
 
-    def grey_scale(image):
-        """Make image monochannel :D."""
-
-        if len(image.shape) == 2:
-            return image
-
-        x, y, = image.shape
-        grey = zeros((y, x))
-        for row in range(y):
-            for col in range(x):
-                grey[y][x] = 0.25 * image[y][x][0]\
-                        + 0.5  * image[y][x][1]\
-                        + 0.25 * image[y][x][2]
-
-        return grey
+    return grey
