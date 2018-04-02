@@ -107,14 +107,14 @@ class naive_bayes(object):
 
         return class_belongance
 
-    def train(self, data, classes):
+    def train(self, data, labels, boost_weigths=None):
         """Train the classifier."""
         self.samples, self.features = data.shape
-        self.classes = set(classes)
+        self.classes = set(labels)
         self.num_of_classes = len(self.classes)
-        self.priors = self.__calculate_priori(classes)
+        self.priors = self.__calculate_priori(labels, boost_weigths)
         self.covariances, self.expected_values =\
-            self.__calculate_maximum_likelyhood(data, classes)
+            self.__calculate_maximum_likelyhood(data, labels, boost_weigths)
 
         print("Training done.")
         return self
