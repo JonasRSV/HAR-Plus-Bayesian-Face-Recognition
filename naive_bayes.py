@@ -1,5 +1,5 @@
 from numpy import array, zeros, mean, log, ones, square
-from sys import exit
+from sys import exit, stdout
 
 MINUS_INF = -100000000000
 
@@ -38,7 +38,8 @@ class naive_bayes(object):
         priors = zeros(self.num_of_classes)
         label_ones = ones(self.samples)
         for _class in self.classes:
-            print("Calculating Priori for class {}".format(_class))
+            stdout.write("\r\r\rCalculating Priori for class {}\
+                          \r\r\r".format(_class))
             _class = int(_class)
 
             occurrences = label_ones[_class == labels]
@@ -64,7 +65,8 @@ class naive_bayes(object):
                             )
 
         for _class in self.classes:
-            print("Calculating Maximum likelyhood for class {}".format(_class))
+            stdout.write("\r\r\rCalculating Maximum likelyhood for class {}\
+                          \r\r\r".format(_class))
             _class = int(_class)
 
             class_data = data[_class == labels]
@@ -109,6 +111,8 @@ class naive_bayes(object):
 
     def train(self, data, labels, boost_weigths=None):
         """Train the classifier."""
+        print("Training a nb classifier\n")
+
         self.samples, self.features = data.shape
         self.classes = set(labels)
         self.num_of_classes = len(self.classes)
@@ -116,7 +120,7 @@ class naive_bayes(object):
         self.covariances, self.expected_values =\
             self.__calculate_maximum_likelyhood(data, labels, boost_weigths)
 
-        print("Training done.")
+        print("\nTraining done.")
         return self
 
     def predict(self, X):
