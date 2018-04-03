@@ -49,14 +49,14 @@ class boosted_classifier(object):
             calculate error for that classifier,
             choose classifier with least error
             """
-            for feature_index, features in enumerate(feature_matrix):
+            for feature_index, feature_on_images in enumerate(feature_matrix):
                 classifier = self.classifier()
-                classifier.train(features, labels, weigths)
+                classifier.train(feature_on_images, labels, weigths)
 
                 error = 0
                 classifications_ = []
-                for index, feature in enumerate(features):
-                    classification = 1 if classifier.predict(feature, weigths)\
+                for index, image in enumerate(feature_on_images):
+                    classification = 1 if classifier.predict(image, weigths)\
                         != labels[index] else 0
 
                     error += classification * weigths[index]
