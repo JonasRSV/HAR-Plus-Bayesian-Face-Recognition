@@ -82,7 +82,8 @@ def training_validation():
 
     print("Formatting data: {}".format(time() - fdt))
 
-    return (train_images, train_labels), (test_images, test_labels)
+    return (train_images, array(train_labels)),\
+           (test_images, array(test_labels))
 
 
 def choose_images(images, cardinality=500):
