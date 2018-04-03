@@ -28,6 +28,10 @@ class boosted_classifier(object):
 
         self.alphas = zeros(num_of_features)
         self.alpha_sum = 0
+        self.bias = 1
+
+    def set_bias(self, bias):
+        self.bias = bias
 
     def train(self, feature_matrix, feature_extracters, labels):
         """Boost classifiers on features."""
@@ -50,13 +54,15 @@ class boosted_classifier(object):
             choose classifier with least error
             """
             for feature_index, feature_on_images in enumerate(feature_matrix):
+                """For each row in feature matrix."""
                 classifier = self.classifier()
+                feature_on_images = feature_on_images.reshape(-1, 1)
                 classifier.train(feature_on_images, labels, weigths)
 
                 error = 0
                 classifications_ = []
                 for index, image in enumerate(feature_on_images):
-                    classification = 1 if classifier.predict(image, weigths)\
+                    classification = 1 if classifier.predict(image)\
                         != labels[index] else 0
 
                     error += classification * weigths[index]
@@ -107,6 +113,18 @@ class boosted_classifier(object):
 
         return time() - timestamp
 
+    def test(self, iis, labels):
+        total_pass = 0
+        false_pass = 0
+        total_false = 0
+        for label, ii in zip(labels, iis):
+            face = self.predict(ii)
+            total_pass += face
+            total_false += (label == 0)
+            false_pass += (face == 1 and label == 0)
+
+        return (total_pass / len(labels), false_pass / (1e-20 + total_false))
+
     def predict(self, X):
         """Predict belongance of X."""
         prediction = 0
@@ -119,5 +137,5 @@ class boosted_classifier(object):
         If half of the boosted classifiers thinks it a thing, it's a thing.
         """
 
-        return 1 if prediction > (self.alpha_sum / 2) else 0
+        return 1 if prediction > self.bias * (self.alpha_sum / 2) else 0
 
