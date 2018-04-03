@@ -2,6 +2,7 @@ from numpy import array, zeros, mean, log, ones, square
 from sys import exit, stdout
 
 MINUS_INF = -100000000000
+PLUS_INF = 100000000000
 
 
 class naive_bayes(object):
@@ -152,7 +153,10 @@ def iodm(matrix):
         exit(1)
 
     for i in range(x):
-        matrix[i][i] = 1 / matrix[i][i]
+        if matrix[i][i] == 0:
+            matrix[i][i] = PLUS_INF
+        else:
+            matrix[i][i] = 1 / matrix[i][i]
 
     return matrix
 
