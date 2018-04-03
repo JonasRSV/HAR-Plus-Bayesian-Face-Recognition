@@ -9,8 +9,9 @@ def training_validation():
 
     tpcsv = time()
 
-    data = read_csv("training.csv", sep=',', header='infer')
-    test = read_csv("test.csv", sep=",", header="infer")
+    train_positives = read_csv("training.csv", sep=',', header='infer')
+    train_negatives = read_csv("file.csv", sep=",", header="infer")
+    train_test = read_csv("test.csv", sep=",", header="infer")
 
     print("reading csv: {}".format(time() - tpcsv))
 
@@ -18,15 +19,17 @@ def training_validation():
 
     images = zeros((7049, 96, 96))
     test_images = zeros((1783, 96, 96))
-    for index, img in enumerate(data["Image"]):
+    for index, img in enumerate(train_positives["Image"]):
         images[index] = fromstring(img, dtype=int, sep=" ").reshape((96, 96))
 
-    for index, img in enumerate(test["Image"]):
+    for index, img in enumerate(train_test["Image"]):
         test_images[index] = fromstring(img, dtype=int, sep=" ").reshape((96, 96))
 
     print("formatting to numpy matrices: {}".format(time() - tfcsv))
 
     tpd = time()
+
+    print(train_test[0])
 
     training, validation = choose_images(images), choose_images(images)
 
