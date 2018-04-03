@@ -98,8 +98,8 @@ class naive_bayes(object):
             expected_value = self.expected_values[class_]
             priori = self.priors[class_]
 
-            quadratic_form = (X - expected_value) @ iodm(covariance) @ (X - expected_value).T
-            log_likelyhood = -0.5 * (log(dodm(covariance)) + quadratic_form)
+            quadratic_form = (X - expected_value).T @ iodm(covariance) @ (X - expected_value)
+            log_likelyhood = -0.5 * (log(dodm(covariance) + 1e-10) + quadratic_form)
             log_priori = log(priori)
 
             belongance = log_likelyhood + log_priori
@@ -137,9 +137,9 @@ def dodm(matrix):
         print("Determinant of a non-square matrix is always 0")
         return 0
 
-    det = 0
+    det = 1
     for i in range(x):
-        det += matrix[i][i]
+        det *= matrix[i][i]
 
     return det
 
@@ -152,11 +152,12 @@ def iodm(matrix):
         print("Non Square matrix not invertible.")
         exit(1)
 
+    penis = zeros(matrix.shape)
     for i in range(x):
         if matrix[i][i] == 0:
-            matrix[i][i] = PLUS_INF
+            matrix[i][i] = 1
         else:
-            matrix[i][i] = 1 / matrix[i][i]
+            penis[i][i] = 1 / matrix[i][i]
 
-    return matrix
+    return penis
 

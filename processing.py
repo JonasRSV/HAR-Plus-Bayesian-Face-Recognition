@@ -1,4 +1,5 @@
 from numpy import array, zeros, asarray
+from math import exp
 from random import shuffle
 from PIL import Image
 from time import time
@@ -8,26 +9,31 @@ class IntegralImage():
         self.h = image.shape[0] - 1
         self.w = image.shape[1] - 1
         self.img = image
+        self.ss = None
+        self.ii = None
 
     def process(self):
         """Preprocess the integral image from top-left corner."""
         image = self.img
         s = zeros(image.shape)
+
+        for y, row in enumerate(image):
+            for x, cell in enumerate(row):
+                if x == 0:
+                    s[y][x] = cell
+                else:
+                    s[y][x] = cell + s[y][x - 1]
+
         ii = zeros(image.shape)
 
-        for indeY, row in enumerate(image):
-            for indeX, cell in enumerate(row):
-                    
-                if indeX == 0:
-                    s[indeY][indeX] = cell
+        for y, row in enumerate(s):
+            for x, cell in enumerate(row):
+                if y == 0:
+                    ii[y][x] = cell
                 else:
-                    s[indeY][indeX] = cell + s[indeY][indeX - 1]
+                    ii[y][x] = ii[y - 1][x] + cell
 
-                if indeY == 0:
-                    ii[indeY][indeX] = s[indeY][indeX]
-                else:
-                    ii[indeY][indeX] = ii[indeY - 1][indeX] + s[indeX][indeY]
-
+        self.ss = s
         self.ii = ii
 
         return self
@@ -37,13 +43,15 @@ class IntegralImage():
         y = int(y * self.h)
         w = int(w * self.w)
         h = int(h * self.h)
-        
+
         tl_x, tl_y = (x, y)
         tr_x, tr_y = (x + w, y)
         bl_x, bl_y = (x, y + h)
         br_x, br_y = (x + w, y + h)
 
         return self.ii[br_y][br_x] + self.ii[tl_y][tl_x] - self.ii[tr_y][tr_x] - self.ii[bl_y][bl_x]
+
+
 
 
 def load_image(name):
@@ -109,8 +117,3 @@ def cross_validate(IIs, labels, percent):
     return td, array(tl), vd, array(vl)
 
 
-
-
-
-
-    pass

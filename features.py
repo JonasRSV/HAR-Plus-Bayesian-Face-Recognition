@@ -1,4 +1,5 @@
 from matplotlib.patches import Rectangle
+from math import exp
 from time import time
 from numpy import array, zeros
 
@@ -17,7 +18,7 @@ class FeatureSize():
 
 def generate_all_sizes():
     """Generate all feature sizes."""
-    dimension = 32
+    dimension = 8
     h = 1
     while h <= dimension:
         w = 1
