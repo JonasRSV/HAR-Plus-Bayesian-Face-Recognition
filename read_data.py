@@ -60,29 +60,7 @@ def training_validation():
 
     print("picking random data: {}".format(time() - tpd))
 
-    fpd = time()
-
-    nsize1 = len(tr_negatives)
-    nsize2 = len(t_negatives)
-
-    psize1 = len(tr_positives)
-    psize2 = len(t_positives)
-
-    nlabels1 = zeros(nsize1)
-    nlabels2 = zeros(nsize2)
-
-    plabels1 = ones(psize1)
-    plabels2 = ones(psize2)
-
-    training_ = concatenate([tr_positives, tr_negatives])
-    training_labels = concatenate([plabels1, nlabels1])
-
-    test_ = concatenate([t_positives, t_negatives])
-    test_labels = concatenate([plabels2, nlabels2])
-
-    print("Formatting data: {}".format(time() - fpd))
-
-    return (training_, training_labels), (test_, test_labels)
+    return (tr_positives, tr_negatives), (t_positives, t_negatives)
 
 
 def choose_images(images, cardinality=500):
