@@ -1,4 +1,6 @@
 from matplotlib.patches import Rectangle
+from time import time
+from numpy import array, zeros
 
 class FeatureSize():
     """As percentages of image size."""
@@ -14,13 +16,18 @@ class FeatureSize():
 
 
 def generate_all_sizes():
+    """Generate all feature sizes."""
+    dimension = 32
     h = 1
-    while h <= 32:
+    while h <= dimension:
         w = 1
-        while w <= 32:
-            for y in range(0, 32, h):
-                for x in range(0, 32, w):
-                    yield FeatureSize(x, y, w, h);
+        while w <= dimension:
+            for y in range(0, dimension, h):
+                for x in range(0, dimension, w):
+                    yield FeatureSize(x / dimension,
+                                      y / dimension,
+                                      w / dimension,
+                                      h / dimension)
             w = w * 2
         h = h * 2
 
@@ -67,4 +74,37 @@ class Feature():
             s += sign[i%2] * ii.sum_square(*val)
         return s
         
+
+def generate_all_features():
+    """Generate all possible features."""
+    all_sizes = generate_all_sizes()
+
+    timestamp = time()
+    all_features = []
+    for size in all_sizes:
+        all_features.append(Feature(size, A))
+        all_features.append(Feature(size, B1))
+        all_features.append(Feature(size, B2))
+        all_features.append(Feature(size, C1))
+        all_features.append(Feature(size, C2))
+
+    print("Generate all features: {}".format(time() - timestamp))
+
+    return all_features
+
+
+def get_feature_matrix(images, all_features):
+    """Get feature matrix and extractor vector."""
+    timestamp = time()
+    heigth = len(all_features)
+    width = len(images)
+
+    feature_matrix = zeros((heigth, width))
+    for y, feature in enumerate(all_features):
+        for x, image in enumerate(images):
+            feature_matrix[y][x] = feature.calculate(image)
+
+    print("get feature matrix: {}".format(time() - timestamp))
+
+    return feature_matrix
 

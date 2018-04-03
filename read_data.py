@@ -35,32 +35,54 @@ def training_validation():
     negative_images_1 = train_negatives[:negative_half]
     negative_images_2 = train_negatives[negative_half:]
 
-    positive_images_1 = zeros((7049, 96, 96))
-    positive_images_2 = zeros((1783, 96, 96))
+    positive_images_1 = []
+    positive_images_2 = []
     for index, img in enumerate(train_positives["Image"]):
-        positive_images_1[index] =\
-            fromstring(img, dtype=int, sep=" ").reshape((96, 96))
+        positive_images_1.append(
+            fromstring(img, dtype=int, sep=" ").reshape((96, 96)))
 
     for index, img in enumerate(train_test["Image"]):
-        positive_images_1[index] =\
-            fromstring(img, dtype=int, sep=" ").reshape((96, 96))
+        positive_images_2.append(
+            fromstring(img, dtype=int, sep=" ").reshape((96, 96)))
 
     print("formatting to numpy matrices: {}".format(time() - tfcsv))
 
     tpd = time()
 
-    tr_negatives = choose_images(negative_images_1,
+    n1random = choose_images(negative_images_1,
                                  cardinality=negative_half - 1)
 
-    t_negatives = choose_images(negative_images_2,
+    n2random = choose_images(negative_images_2,
                                 cardinality=negative_half)
 
-    tr_positives = choose_images(positive_images_1)
-    t_positives = choose_images(positive_images_2)
+    p1random = choose_images(positive_images_1)
+    p2random = choose_images(positive_images_2)
 
     print("picking random data: {}".format(time() - tpd))
 
-    return (tr_positives, tr_negatives), (t_positives, t_negatives)
+    fdt = time()
+
+    p1label = [1] * (len(p1random))
+    p2label = [1] * (len(p2random))
+
+    n1label = [0] * (len(n1random))
+    n2label = [0] * (len(n2random))
+
+    p1random.extend(n1random)
+    p1label.extend(n1label)
+
+    p2random.extend(n2random)
+    p2label.extend(n2label)
+
+    train_images = p1random
+    train_labels = p1label
+
+    test_images = p2random
+    test_labels = p2label
+
+    print("Formatting data: {}".format(time() - fdt))
+
+    return (train_images, train_labels), (test_images, test_labels)
 
 
 def choose_images(images, cardinality=500):
