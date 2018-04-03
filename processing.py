@@ -28,6 +28,8 @@ class IntegralImage():
 
         self.ii = ii
 
+        return self
+
     def sum_square(self, x, y, w, h):
         x = int(x * self.w)
         y = int(y * self.h)
