@@ -1,5 +1,6 @@
 from naive_bayes import naive_bayes
 from numpy import array, zeros, ones, log
+from sys import stdout
 from time import time
 
 INT_MAX = 10000000000
@@ -61,11 +62,11 @@ class boosted_classifier(object):
 
                 error = 0
                 classifications_ = []
-                for index, image in enumerate(feature_on_images):
+                for i_index, image in enumerate(feature_on_images):
                     classification = 1 if classifier.predict(image)\
-                        != labels[index] else 0
+                        != labels[i_index] else 0
 
-                    error += classification * weigths[index]
+                    error += classification * weigths[i_index]
                     classifications_.append(classification)
 
                 if error < lowest_error:
@@ -109,6 +110,9 @@ class boosted_classifier(object):
             self.classifiers.append(best_classifier)
             self.feature_extracters.append(feature_extracter)
 
+            stdout.write("\rclassifiers left: {}\r"
+                         .format(self.num_of_features - len(self.classifiers)))
+
         self.alpha_sum = sum(self.alphas)
 
         return time() - timestamp
@@ -128,9 +132,9 @@ class boosted_classifier(object):
     def predict(self, X):
         """Predict belongance of X."""
         prediction = 0
-        for index, alpha in self.alphas:
-            """feature = self.feature_extracters[index].get(X)."""
-            feature = 5
+        for index, alpha in enumerate(self.alphas):
+            feature = self.feature_extracters[index].calculate(X)
+
             prediction += alpha * self.classifiers[index].predict(feature)
 
         """
