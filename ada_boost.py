@@ -56,12 +56,13 @@ class boosted_classifier(object):
             for feature_index, feature_on_images in enumerate(feature_matrix):
                 """For each row in feature matrix."""
                 classifier = self.classifier()
+                feature_on_images = feature_on_images.reshape(-1, 1)
                 classifier.train(feature_on_images, labels, weigths)
 
                 error = 0
                 classifications_ = []
                 for index, image in enumerate(feature_on_images):
-                    classification = 1 if classifier.predict(image, weigths)\
+                    classification = 1 if classifier.predict(image)\
                         != labels[index] else 0
 
                     error += classification * weigths[index]
@@ -120,8 +121,9 @@ class boosted_classifier(object):
             face = self.predict(ii)
             total_pass += face
             total_false += (label == 0)
-            false_pass += (face == 1 && label == 0)
-        return (total_pass / len(labels), false_pass / (1e-20 + total_false)
+            false_pass += (face == 1 and label == 0)
+
+        return (total_pass / len(labels), false_pass / (1e-20 + total_false))
 
     def predict(self, X):
         """Predict belongance of X."""

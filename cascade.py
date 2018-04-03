@@ -14,16 +14,20 @@ class cascade(object):
         # Positive samples
         # Negative samples
         F_old = 1.0
-        F_new = F_0
+        F_new = F_old
         D_old = 1.0
-        D_new = D_0
+        D_new = D_old
 
         # Generate feature_matrix
 
         classifyer_list = []
-
         i = 0
+
+        print("Starting training")
+
         while F_new > fail_target:
+            print("Round we go!! Currently:", F_new, " Target is: ", fail_target)
+
             iis_train, labels_train, iis_test, labels_test = cross_validate(iis, labels, 0.8)
             all_features = generate_all_features()
             feature_matrix = get_feature_matrix(iis_train, all_features)
@@ -34,11 +38,14 @@ class cascade(object):
             b = None
             while F_new > F_old * self.f:
                 n_i += 1
+                print("Generating classifiers with", n_i, "features")
+                print("Feature matrix shape", feature_matrix.shape)
                 b = boosted_classifier(n_i)
                 b.train(feature_matrix, all_features, labels_train)
                 D_new, F_new = b.test(iis_test, labels_test)
 
                 if D_new < self.d:
+                    print("Here we go binsearching again")
                     hi = 1.0
                     lo = 0.0
                     for i in range(10):
