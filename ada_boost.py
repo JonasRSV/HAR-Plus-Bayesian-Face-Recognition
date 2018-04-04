@@ -36,7 +36,7 @@ class boosted_classifier(object):
 
     def train(self, feature_matrix, feature_extracters, labels):
         """Boost classifiers on features."""
-        print("Training boosted classifier with {} features"
+        stdout.write("\rTraining boosted classifier with {} features\r"
               .format(self.num_of_features))
         timestamp = time()
 
@@ -127,7 +127,7 @@ class boosted_classifier(object):
             total_false += (label == 0)
             false_pass += (face == 1 and label == 0)
 
-        return (total_pass / len(labels), false_pass / (1e-20 + total_false))
+        return (total_pass / len(labels), false_pass / total_false)
 
     def predict(self, X):
         """Predict belongance of X."""

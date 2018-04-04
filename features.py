@@ -2,6 +2,7 @@ from matplotlib.patches import Rectangle
 from math import exp
 from time import time
 from numpy import array, zeros
+from sys import stdout
 
 class FeatureSize():
     """As percentages of image size."""
@@ -89,7 +90,7 @@ def generate_all_features():
         all_features.append(Feature(size, C1))
         all_features.append(Feature(size, C2))
 
-    print("Generate all features: {}".format(time() - timestamp))
+    stdout.write("\rGenerate all features: {}\r".format(time() - timestamp))
 
     return all_features
 
@@ -105,7 +106,7 @@ def get_feature_matrix(images, all_features):
         for x, image in enumerate(images):
             feature_matrix[y][x] = feature.calculate(image)
 
-    print("get feature matrix: {}".format(time() - timestamp))
+    stdout.write("\rget feature matrix: {}\r".format(time() - timestamp))
 
     return feature_matrix
 

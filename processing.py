@@ -96,7 +96,7 @@ def cross_validate(IIs, labels, percent):
     data = list(zip(IIs, labels))
     shuffle(data)
 
-    train = int(len(data) * (1 - percent))
+    train = int(len(data) * percent)
 
     train_data = data[:train]
     validate_data = data[train:]
@@ -111,8 +111,8 @@ def cross_validate(IIs, labels, percent):
     vd = []
     vl = []
     for ii, label in validate_data:
-        vd.append(vd)
-        vd.append(vl)
+        vd.append(ii)
+        vl.append(label)
 
     return td, array(tl), vd, array(vl)
 
