@@ -1,4 +1,5 @@
 from processing import IntegralImage
+from matplotlib.patches import Rectangle
 
 class Window(object):
 
@@ -50,20 +51,4 @@ def slide(image, shape, stride=10):
 
     return windows
 
-
-# def classify_windows(classifier, windows):
-    # """Classify all windows."""
-    # positives, negatives = [], []
-    # for window in windows:
-        # (positive, distance, closest_face) =\
-            # classifier.predict(window.get_classifiable())
-
-        # if positive:
-            # positives.append(
-                # window.set_distance_and_reason(distance, closest_face))
-        # else:
-            # negatives.append(
-                # window.set_distance_and_reason(distance, closest_face))
-
-    # return positives, negatives
 

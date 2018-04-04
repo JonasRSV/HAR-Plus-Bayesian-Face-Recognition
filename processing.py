@@ -68,13 +68,13 @@ def grey_scale(image):
     if len(image.shape) == 2:
         return image
 
-    x, y, = image.shape
+    y, x, _ = image.shape
     grey = zeros((y, x))
     for row in range(y):
         for col in range(x):
-            grey[y][x] = 0.25 * image[y][x][0]\
-                    + 0.5  * image[y][x][1]\
-                    + 0.25 * image[y][x][2]
+            grey[row][col] = 0.25 * image[row][col][0]\
+                    + 0.5  * image[row][col][1]\
+                    + 0.25 * image[row][col][2]
 
     return grey
 
