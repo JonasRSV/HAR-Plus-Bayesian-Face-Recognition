@@ -110,7 +110,8 @@ class boosted_classifier(object):
             self.classifiers.append(best_classifier)
             self.feature_extracters.append(feature_extracter)
 
-            stdout.write("\rclassifiers left: {}\r"
+            # Added some space to clear row
+            stdout.write("\rclassifiers left: {}                                       \r"
                          .format(self.num_of_features - len(self.classifiers)))
 
         self.alpha_sum = sum(self.alphas)

@@ -36,38 +36,42 @@ class cascade(object):
         below 0.05... And perhaps one of those two false positives is a cloud or something that practially
         looks like a face..
         """
-        while calculate_true_false_positive(labels, F_new, total_labels) > fail_target:
-            print("Round we go!! Currently: {}  Target is: {}"
-                    .format(calculate_true_false_positive(labels, F_new, total_labels), fail_target))
+        while F_new > fail_target:
+            i += 1
+            print("Round: {}, Currently: {},  Target is: {}" .format(i, F_new, fail_target))
 
             iis_train, labels_train, iis_test, labels_test = cross_validate(iis, labels, 0.8)
 
             all_features = generate_all_features()
             feature_matrix = get_feature_matrix(iis_train, all_features)
 
-            i += 1
             n_i = 0
-            F_new = F_old
             b = None
-            while F_new > F_old * self.f:
+            F_old = F_new
+            D_old = D_new
+            inner_target = max(F_old * self.f, fail_target)
+            while F_new > inner_target:
                 n_i += 1
-                stdout.write("\rCurrent {}, Goal {}\r".format(F_new, F_old * self.f))
+                print("Current {}, Goal {}, Number Of Features {}"
+                        .format(F_new, inner_target, n_i))
                 b = boosted_classifier(n_i)
                 b.train(feature_matrix, all_features, labels_train)
-                D_new, F_new = b.test(iis_test, labels_test)
+                d, f = b.test(iis_test, labels_test)
 
-                if D_new < self.d:
-                    stdout.write("\rHere we go binsearching again\r")
+                if d < self.d:
                     hi = 1.0
                     lo = 0.0
-                    for i in range(10):
+                    for _ in range(10):
                         mid = (hi + lo) / 2
                         b.set_bias(mid)
-                        D_new, F_new = b.test(iis_test, labels_test)
-                        if D_new < self.d:
+                        d, f = b.test(iis_test, labels_test)
+                        if d < self.d:
                             hi = mid
                         else:
                             lo = mid
+
+                D_new = d * D_old
+                F_new = f * F_old
 
             classifyer_list.append(b)
 
@@ -99,3 +103,4 @@ def calculate_true_false_positive(current_labels, percentage, total_labels):
     current_false = len(current_labels[current_labels == 0])
 
     return (current_false * percentage) / total_false
+
