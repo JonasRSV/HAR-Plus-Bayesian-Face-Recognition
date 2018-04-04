@@ -34,10 +34,10 @@ def training_validation():
     print("reading csv: {}".format(time() - tpcsv))
 
     tfcsv = time()
-    negative_half = int(len(train_negatives) / 2)
+    negative_quater = int(len(train_negatives) / 4)
 
-    negative_images_1 = train_negatives[:negative_half]
-    negative_images_2 = train_negatives[negative_half:]
+    negative_images_1 = train_negatives[negative_quater:]
+    negative_images_2 = train_negatives[:negative_quater]
 
     positive_images_1 = []
     positive_images_2 = []
@@ -54,12 +54,12 @@ def training_validation():
     tpd = time()
 
     n1random = choose_images(negative_images_1,
-                                 cardinality=negative_half - 1)
+                                 cardinality=500)
 
     n2random = choose_images(negative_images_2,
-                                cardinality=negative_half)
+                                cardinality=negative_quater)
 
-    p1random = choose_images(positive_images_1)
+    p1random = choose_images(positive_images_1, cardinality=900)
     p2random = choose_images(positive_images_2)
 
     print("picking random data: {}".format(time() - tpd))

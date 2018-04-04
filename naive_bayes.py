@@ -145,12 +145,12 @@ def iodm(matrix):
         print("Non Square matrix not invertible.")
         exit(1)
 
-    penis = zeros(matrix.shape)
+    inverted = zeros(matrix.shape)
     for i in range(x):
         if matrix[i][i] == 0:
-            matrix[i][i] = 1
+            inverted[i][i] = 1
         else:
-            penis[i][i] = 1 / matrix[i][i]
+            inverted[i][i] = 1 / matrix[i][i]
 
-    return penis
+    return inverted
 
