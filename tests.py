@@ -1,4 +1,7 @@
+from time import time
 def simple(classifier, test_data, test_labels, test_images, plots):
+
+    timestamp = time()
 
     correct = 0
     total = len(test_data)
@@ -23,13 +26,19 @@ def simple(classifier, test_data, test_labels, test_images, plots):
             false_negative = test_images[index]
             
         correct += 1 if classifier.predict(image) == test_labels[index] else 0
+
+
         
-
-    fig, (fp, fn) = plots
-
-    fp.imshow(false_positive)
-    fn.imshow(false_negative)
-
+    print("Avarage detection rate: {}".format((time() - timestamp) / total))
     print("Success rate: {}".format(correct / total))
     print("False positives {}".format(false_positives / total))
     print("False negatives {}".format(false_negatives / total))
+
+    fig, (fp, fn) = plots
+
+    if not false_positive is None:
+        fp.imshow(false_positive)
+
+    if not false_negative is None:
+        fn.imshow(false_negative)
+
