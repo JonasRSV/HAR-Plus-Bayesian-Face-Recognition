@@ -1,4 +1,6 @@
 from processing import IntegralImage
+from matplotlib.patches import Rectangle
+
 
 class Window(object):
 

@@ -31,7 +31,7 @@ class detector(object):
         y_diff = self.window_end[1] - slide_shape[1]
         IIWs = []
         while x_diff >= 0 and y_diff >= 0:
-            IIs.extend(slide(image, slide_shape, self.stride))
+            IIWs.extend(slide(image, slide_shape, self.stride))
 
             slide_shape = (slide_shape[0] * self.sizeup, slide_shape[1] * self.sizeup)
 
