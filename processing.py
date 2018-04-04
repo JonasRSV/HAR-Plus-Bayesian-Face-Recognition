@@ -75,7 +75,6 @@ def grey_scale(image):
             grey[row][col] = 0.25 * image[row][col][0]\
                     + 0.5  * image[row][col][1]\
                     + 0.25 * image[row][col][2]
-
     return grey
 
 
