@@ -1,7 +1,11 @@
 from pandas import read_csv
 from random import choice, shuffle
-from numpy import array, zeros, fromstring, sqrt, ones, concatenate
+from numpy import array, zeros, fromstring, sqrt, ones, concatenate, save, load
 from time import time
+import processing
+import features
+import os
+import pickle
 
 def read_filip_csv_format(file_path):
     """Read the awesome filip csv format."""
@@ -91,3 +95,48 @@ def choose_images(images, cardinality=500):
     shuffle(images)
     return images[:cardinality]
 
+
+def get_trainable_data(training_images, test_images):
+    """Handle caching and loading of formatted data."""
+    outTrain = None
+    outTest = None
+
+    training = None
+    test = None
+    IItraining = None
+    IItest = None
+    all_features = features.generate_all_features()
+
+    if not os.path.isfile("training_feature_matrix.npy"):
+    
+        print("Stage 1")
+        IItraining = processing.bulk_II(training_images)
+        IItest = processing.bulk_II(test_images)
+        
+        outTrain = open('IITraining.pkl', 'wb')
+        outTest = open('IITesting.pkl', 'wb')
+        pickle.dump(IItraining, outTrain)
+        pickle.dump(IItest, outTest)
+        outTrain.close()
+        outTest.close()
+        
+        print("Stage 2")
+        training = features.get_feature_matrix(IItraining, all_features)
+        test = features.get_feature_matrix(IItest, all_features)
+
+        """ _ is same as above. """
+
+        save("training_feature_matrix", training)
+        save("test_feature_matrix", test)
+    else:
+        training = load("training_feature_matrix.npy")
+        test = load("test_feature_matrix.npy")
+        outTrain = open('IITraining.pkl', 'rb')
+        outTest = open('IITesting.pkl', 'rb')
+        IItraining = pickle.load(outTrain)
+        IItest = pickle.load(outTest)
+        outTrain.close()
+        outTest.close()
+
+
+    return training, test, IItraining, IItest, all_features, outTrain, outTest

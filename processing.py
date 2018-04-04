@@ -1,4 +1,4 @@
-from numpy import array, zeros, asarray
+from numpy import array, zeros, asarray, log10, sign
 from math import exp
 from random import shuffle
 from PIL import Image
@@ -49,7 +49,7 @@ class IntegralImage():
         bl_x, bl_y = (x, y + h)
         br_x, br_y = (x + w, y + h)
 
-        return self.ii[br_y][br_x] + self.ii[tl_y][tl_x] - self.ii[tr_y][tr_x] - self.ii[bl_y][bl_x]
+        return log_normalization(self.ii[br_y][br_x] + self.ii[tl_y][tl_x] - self.ii[tr_y][tr_x] - self.ii[bl_y][bl_x])
 
 
 
@@ -116,4 +116,9 @@ def cross_validate(IIs, labels, percent):
 
     return td, array(tl), vd, array(vl)
 
+def log_normalization(v): 
+    if v == 0:
+        return 0
+    else:
+        return sign(v) * log10(v * sign(v))
 
