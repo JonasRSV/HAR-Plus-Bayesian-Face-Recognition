@@ -6,9 +6,10 @@ from sys import stdout
 
 
 class cascade(object):
-    def __init__(self, accepted_false_positive, min_accepted_detection):
+    def __init__(self, accepted_false_positive, min_accepted_detection, max_features):
         self.f = accepted_false_positive # Maximum percenteage off false positives to make it throug
         self.d = min_accepted_detection # Minimum amount of things that should pass through
+        self.mf = max_features
 
     def train(self, iis, labels, fail_target):
         """Train the cascade."""
@@ -25,37 +26,29 @@ class cascade(object):
         classifyer_list = []
         i = 0
 
+        n_i = 0
         print("Starting training")
-        """
-        Instead of having F_new > fail_target i believe this is better.
-
-        Having F_new > fail_target is just mean. Imagine incrementally succeeding in the middle
-        loop so that the number of false positives constantly is reduced.. But you'll never get closer
-        to fail_target target since you need to be below 0.05 percent false positive on the CURRENT classification.
-        Imagine there only being 2 false positives left, y'd have to get 0 false positives for that to be
-        below 0.05... And perhaps one of those two false positives is a cloud or something that practially
-        looks like a face..
-        """
+        all_features = generate_all_features()
         while F_new > fail_target:
             i += 1
             print("Round: {}, Currently: {},  Target is: {}" .format(i, F_new, fail_target))
 
             iis_train, labels_train, iis_test, labels_test = cross_validate(iis, labels, 0.8)
 
-            all_features = generate_all_features()
             feature_matrix = get_feature_matrix(iis_train, all_features)
 
-            n_i = 0
             b = None
             F_old = F_new
             D_old = D_new
             inner_target = max(F_old * self.f, fail_target)
+
+            weights, memory = None, None
             while F_new > inner_target:
                 n_i += 1
                 print("Current {}, Goal {}, Number Of Features {}"
                         .format(F_new, inner_target, n_i))
                 b = boosted_classifier(n_i)
-                b.train(feature_matrix, all_features, labels_train)
+                weights, memory = b.train(feature_matrix, all_features, labels_train, weights, memory)
                 d, f = b.test(iis_test, labels_test)
 
                 if d < self.d:
@@ -72,6 +65,9 @@ class cascade(object):
 
                 D_new = d * D_old
                 F_new = f * F_old
+
+                if self.mf < n_i:
+                    F_new = 0.0
 
             classifyer_list.append(b)
 
@@ -98,7 +94,7 @@ class cascade(object):
                 return False
         return True
 
-def calculate_true_false_positive(current_labels, percentage, total_labels):
+def calc_true_fp(current_labels, percentage, total_labels):
     total_false = len(total_labels[total_labels == 0])
     current_false = len(current_labels[current_labels == 0])
 

@@ -27,86 +27,100 @@ class boosted_classifier(object):
         self.classifiers = []
         self.feature_extracters = []
 
-        self.alphas = zeros(num_of_features)
+        self.alphas = []
         self.alpha_sum = 0
         self.bias = 1
 
     def set_bias(self, bias):
         self.bias = bias
 
-    def train(self, feature_matrix, feature_extracters, labels):
+    def __best_classifier(self, feature_matrix, feature_extracters, labels, weigths):
+        """Get best classifier."""
+        best_classifier = None
+        feature_extracter = None
+        lowest_error = INT_MAX
+        classifications = []
+
+        """
+        Create classifier for each feature and
+        calculate error for that classifier,
+        choose classifier with least error
+        """
+        for feature_index, feature_on_images in enumerate(feature_matrix):
+            """For each row in feature matrix."""
+            classifier = self.classifier()
+            feature_on_images = feature_on_images.reshape(-1, 1)
+            classifier.train(feature_on_images, labels, weigths)
+
+            error = 0
+            classifications_ = []
+            for i_index, image in enumerate(feature_on_images):
+                classification = 1 if classifier.predict(image)\
+                    != labels[i_index] else 0
+
+                error += classification * weigths[i_index]
+                classifications_.append(classification)
+
+            if error < lowest_error:
+                best_classifier = classifier
+                feature_extracter = feature_extracters[feature_index]
+
+                lowest_error = error
+                classifications = classifications_
+
+        return best_classifier, feature_extracter, lowest_error, classifications
+
+
+    def __update_weights(self, weigths, lowest_error, classifications):
+        """Update weights from boosting."""
+        Bt = lowest_error / (1 - lowest_error)
+
+        """
+        Contrary to the other distribution
+        we used in Lab3, this distribution
+        reduces the weights of the correctly
+        classified, rather than increase the
+        weight of the wrongly classified.
+        """
+        intermediary = zeros(weigths.shape)
+        for w_index, weigth in enumerate(weigths):
+            intermediary[w_index] =\
+                weigth * pow(Bt, 1 - classifications[w_index])
+
+        weigths = intermediary
+
+        """
+        The paper does not mention normalizing the weights
+        but i'll do that anyway, it seems like a reasonable thing
+        to do
+        """
+        weigths = weigths / sum(weigths)
+
+        return weigths, Bt
+
+    def train(self, feature_matrix, feature_extracters, labels, weigths=None, memory=None):
         """Boost classifiers on features."""
         stdout.write("\rTraining boosted classifier with {} features\r"
               .format(self.num_of_features))
         timestamp = time()
 
-        weigths = ones(labels.shape) / len(labels)
+        if weigths is None:
+            weigths = ones(labels.shape) / len(labels)
 
-        for index in range(self.num_of_features):
+        if not memory is None:
+            self.classifiers, self.alphas, self.feature_extracters = memory
 
-            best_classifier = None
-            feature_extracter = None
-            lowest_error = INT_MAX
-            classifications = []
 
-            """
-            Create classifier for each feature and
-            calculate error for that classifier,
-            choose classifier with least error
-            """
-            for feature_index, feature_on_images in enumerate(feature_matrix):
-                """For each row in feature matrix."""
-                classifier = self.classifier()
-                feature_on_images = feature_on_images.reshape(-1, 1)
-                classifier.train(feature_on_images, labels, weigths)
+        for _ in range(self.num_of_features - len(self.classifiers)):
 
-                error = 0
-                classifications_ = []
-                for i_index, image in enumerate(feature_on_images):
-                    classification = 1 if classifier.predict(image)\
-                        != labels[i_index] else 0
+            best_classifier, feature_extracter, lowest_error, classifications =\
+                    self.__best_classifier(feature_matrix, feature_extracters, labels, weigths)
 
-                    error += classification * weigths[i_index]
-                    classifications_.append(classification)
 
-                if error < lowest_error:
-                    best_classifier = classifier
-                    feature_extracter = feature_extracters[feature_index]
 
-                    lowest_error = error
-                    classifications = classifications_
+            weights, Bt = self.__update_weights(weigths, lowest_error, classifications) 
 
-            """
-            Update weights with the info
-            from the best classifier.
-            Add feature extracter, alpha
-            and classifier to boosted
-            classifier.
-            """
-            Bt = lowest_error / (1 - lowest_error)
-
-            """
-            Contrary to the other distribution
-            we used in Lab3, this distribution
-            reduces the weights of the correctly
-            classified, rather than increase the
-            weight of the wrongly classified.
-            """
-            intermediary = zeros(weigths.shape)
-            for w_index, weigth in enumerate(weigths):
-                intermediary[w_index] =\
-                    weigth * pow(Bt, 1 - classifications[w_index])
-
-            weigths = intermediary
-
-            """
-            The paper does not mention normalizing the weights
-            but i'll do that anyway, it seems like a reasonable thing
-            to do
-            """
-            weigths = weigths / sum(weigths)
-
-            self.alphas[index] = log(1 / Bt)
+            self.alphas.append(log(1 / Bt))
             self.classifiers.append(best_classifier)
             self.feature_extracters.append(feature_extracter)
 
@@ -116,7 +130,8 @@ class boosted_classifier(object):
 
         self.alpha_sum = sum(self.alphas)
 
-        return time() - timestamp
+        return weights, (self.classifiers, self.alphas, self.feature_extracters)
+
 
     def test(self, iis, labels):
         total_pass = 0
