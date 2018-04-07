@@ -49,7 +49,7 @@ class IntegralImage():
         bl_x, bl_y = (x, y + h)
         br_x, br_y = (x + w, y + h)
 
-        return log_normalization(self.ii[br_y][br_x] + self.ii[tl_y][tl_x] - self.ii[tr_y][tr_x] - self.ii[bl_y][bl_x])
+        return self.ii[br_y][br_x] + self.ii[tl_y][tl_x] - self.ii[tr_y][tr_x] - self.ii[bl_y][bl_x]
 
 
 

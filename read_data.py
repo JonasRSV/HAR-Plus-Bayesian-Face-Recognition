@@ -1,6 +1,7 @@
 from pandas import read_csv
 from random import choice, shuffle
-from numpy import array, zeros, fromstring, sqrt, ones, concatenate, save, load
+from numpy import array, zeros, fromstring, sqrt, ones, concatenate, save, load, vectorize
+from numpy.random import randn
 from time import time
 import processing
 import features
@@ -59,9 +60,17 @@ def training_validation():
     n2random = choose_images(negative_images_2,
                                 cardinality=negative_quater)
 
-    p1random = choose_images(positive_images_1, cardinality=900)
+    p1random = choose_images(positive_images_1, cardinality=600)
     p2random = choose_images(positive_images_2)
 
+    NOICE = 200
+
+    noice = []
+    distributer = vectorize(lambda x: abs(x) * 120)
+    for _ in range(NOICE):
+        noice.append(distributer(randn(96, 96)))
+
+    
     print("picking random data: {}".format(time() - tpd))
 
     fdt = time()
@@ -72,8 +81,12 @@ def training_validation():
     n1label = [0] * (len(n1random))
     n2label = [0] * (len(n2random))
 
+    noice_label = [0] * NOICE
+
     p1random.extend(n1random)
+    p1random.extend(noice)
     p1label.extend(n1label)
+    p1label.extend(noice_label)
 
     p2random.extend(n2random)
     p2label.extend(n2label)

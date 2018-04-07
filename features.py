@@ -1,7 +1,7 @@
 from matplotlib.patches import Rectangle
 from math import exp
 from time import time
-from numpy import array, zeros
+from numpy import array, zeros, sign as sign
 from sys import stdout
 
 class FeatureSize():
@@ -19,7 +19,7 @@ class FeatureSize():
 
 def generate_all_sizes():
     """Generate all feature sizes."""
-    dimension = 8
+    dimension = 4
     h = 1
     while h <= dimension:
         w = 1
@@ -70,10 +70,10 @@ class Feature():
             plt.add_patch(Rectangle((val[0] * ii.w, val[1] * ii.h), val[2] * ii.w, val[3] * ii.h, facecolor=color[i%2]))
 
     def calculate(self, ii):
-        sign = [1, -1]
+        signs = [1, -1]
         s = 0
         for i, val in enumerate(self.ptrn(self.size)):
-            s += sign[i%2] * ii.sum_square(*val)
+            s += signs[i%2] * ii.sum_square(*val)
         return s
         
 

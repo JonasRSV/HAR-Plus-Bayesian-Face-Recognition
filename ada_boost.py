@@ -48,6 +48,11 @@ class boosted_classifier(object):
         """
         for feature_index, feature_on_images in enumerate(feature_matrix):
             """For each row in feature matrix."""
+
+            """Don't add same feature multiple times."""
+            if feature_extracters[feature_index] in self.feature_extracters:
+                continue
+
             classifier = self.classifier()
             feature_on_images = feature_on_images.reshape(-1, 1)
             classifier.train(feature_on_images, labels, weigths)
@@ -71,7 +76,7 @@ class boosted_classifier(object):
         return best_classifier, feature_extracter, lowest_error, classifications
 
 
-    def __update_weights(self, weigths, lowest_error, classifications):
+    def __update_weigths(self, weigths, lowest_error, classifications):
         """Update weights from boosting."""
         Bt = lowest_error / (1 - lowest_error)
 
@@ -82,10 +87,10 @@ class boosted_classifier(object):
         classified, rather than increase the
         weight of the wrongly classified.
         """
+
         intermediary = zeros(weigths.shape)
         for w_index, weigth in enumerate(weigths):
-            intermediary[w_index] =\
-                weigth * pow(Bt, 1 - classifications[w_index])
+            intermediary[w_index] = weigths[w_index] * pow(Bt, 1 - classifications[w_index])
 
         weigths = intermediary
 
@@ -118,7 +123,7 @@ class boosted_classifier(object):
 
 
 
-            weights, Bt = self.__update_weights(weigths, lowest_error, classifications) 
+            weigths, Bt = self.__update_weigths(weigths, lowest_error, classifications) 
 
             self.alphas.append(log(1 / Bt))
             self.classifiers.append(best_classifier)
@@ -130,7 +135,7 @@ class boosted_classifier(object):
 
         self.alpha_sum = sum(self.alphas)
 
-        return weights, (self.classifiers, self.alphas, self.feature_extracters)
+        return weigths, (self.classifiers, self.alphas, self.feature_extracters)
 
 
     def test(self, iis, labels):
